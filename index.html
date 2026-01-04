@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Joyeee | Professional Archive</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Inter:wght@200;300;400&family=Noto+Serif+SC:wght@200;300;400&display=swap');
+
+        :root {
+            --snow-white: #fcfdfe;
+            --text-primary: #1a1a1a;
+            --accent-ink: #335c81; 
+        }
+
+        html { scroll-behavior: smooth; }
+        body {
+            background-color: var(--snow-white);
+            color: var(--text-primary);
+            font-family: 'Inter', "Noto Serif SC", serif;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+        .serif { font-family: 'Cormorant Garamond', "Noto Serif SC", serif; }
+        ::-webkit-scrollbar { width: 0px; }
+
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            pointer-events: none;
+            background: linear-gradient(to bottom, #fcfdfe, #eef2f7);
+        }
+
+        .fade-in { animation: fadeIn 0.8s cubic-bezier(0.2, 0, 0.2, 1) forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .vibrant-accent {
+            color: var(--accent-ink);
+            text-shadow: 0 0 15px rgba(51, 92, 129, 0.15);
+            font-weight: 300;
+        }
+
+        .img-container {
+            overflow: hidden;
+            background-color: #f5f5f5;
+            cursor: pointer;
+            position: relative;
+            aspect-ratio: 16 / 10;
+        }
+        .img-container img {
+            transition: transform 1.2s cubic-bezier(0.2, 0, 0.2, 1), filter 0.8s ease;
+            filter: grayscale(100%);
+            width: 100%; height: 100%; object-fit: cover;
+        }
+        .img-container:hover img { transform: scale(1.05); filter: grayscale(0%); }
+
+        .nav-link {
+            font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+            position: relative; padding: 4px 0; cursor: pointer;
+        }
+        .nav-link::after {
+            content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 1px; background: black;
+            transition: width 0.3s ease;
+        }
+        .nav-link:hover::after { width: 100%; }
+
+        .hidden-view { display: none; }
+
+        .about-full-bg {
+            position: relative;
+            width: 100vw;
+            margin-left: calc(-50vw + 50%);
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            background-image: url('assets/about_bg.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        .about-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(90deg, rgba(255,255,255,0.98) 10%, rgba(255,255,255,0.7) 50%, rgba(255,255,255,0) 100%);
+        }
+
+        .writing-strip { transition: all 0.5s ease; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .writing-strip:hover { background-color: rgba(0,0,0,0.02); padding-left: 20px; }
+        
+        #copy-toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: rgba(26, 26, 26, 0.9); color: white; padding: 14px 28px; font-size: 12px; letter-spacing: 0.05em; z-index: 1000; transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1); backdrop-filter: blur(8px); border-radius: 4px; white-space: nowrap; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        #copy-toast.active { transform: translateX(-50%) translateY(0); }
+
+        .contact-item {
+            cursor: pointer;
+            padding: 2rem;
+            transition: opacity 0.3s ease;
+        }
+        .contact-text {
+            transition: color 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .contact-item:hover .contact-text {
+            color: var(--accent-ink);
+        }
+
+        .hero-screen {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+        }
+
+        .vertical-text {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2s infinite;
+            opacity: 0.3;
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateX(-50%) translateY(0);}
+            40% {transform: translateX(-50%) translateY(-10px);}
+            60% {transform: translateX(-50%) translateY(-5px);}
+        }
+
+        @media (min-width: 1600px) {
+            .container-limit { max-width: 1400px; margin-left: auto; margin-right: auto; }
+        }
+
+        /* 合作状态点样式 */
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            background-color: #10b981;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 12px;
+            box-shadow: 0 0 10px #10b981;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(0.9); opacity: 0.7; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(0.9); opacity: 0.7; }
+        }
+
+        /* 详情页元数据样式 */
+        .detail-meta-label { font-size: 10px; color: #999; text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 0.5rem; }
+        .detail-meta-value { font-size: 1.25rem; font-weight: 300; margin-bottom: 2rem; }
+        .asset-placeholder { background: #f0f3f6; height: 300px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; tracking: 0.3em; color: #ccc; border: 1px dashed #ddd; }
+        .back-btn-bottom { display: inline-flex; items-center; gap: 1rem; cursor: pointer; opacity: 0.4; transition: opacity 0.3s; padding: 1rem 0; }
+        .back-btn-bottom:hover { opacity: 1; }
+
+        /* 文字产出样式 */
+        .writing-card { padding: 2.5rem 0; border-bottom: 1px solid rgba(0,0,0,0.05); cursor: pointer; transition: all 0.3s ease; }
+        .writing-card:hover { border-bottom-color: var(--text-primary); }
+        .writing-card:hover .writing-title { transform: translateX(10px); color: var(--accent-ink); }
+        .writing-title { transition: all 0.4s ease; display: block; }
+        .reading-view { max-width: 720px; margin: 0 auto; line-height: 2.2; font-size: 1.15rem; color: #333; }
+        .reading-view p { margin-bottom: 2.5rem; }
+    </style>
+</head>
+<body>
+
+    <canvas id="bg-canvas"></canvas>
+    <div id="copy-toast">复制成功</div>
+
+    <header class="fixed top-0 left-0 w-full z-50 px-8 md:px-16 py-8 flex justify-between items-center bg-white/10 backdrop-blur-md transition-all duration-500 hover:bg-white/40">
+        <div onclick="showHome(true)" class="cursor-pointer">
+            <span class="text-xl tracking-[0.3em] serif font-light">JOYEEE</span>
+        </div>
+        <nav id="main-nav" class="hidden md:flex gap-12">
+            <span onclick="showHome(true)" class="nav-link">Home</span>
+            <span onclick="scrollToId('about-section')" class="nav-link">About</span>
+            <span onclick="scrollToId('projects-grid')" class="nav-link">Archive</span>
+            <span onclick="scrollToId('contact-area')" class="nav-link">Contact</span>
+        </nav>
+        <div class="flex items-center gap-6">
+            <div id="dynamic-nav"></div>
+            <div class="flex gap-3 text-[10px] tracking-widest border-l border-black/10 pl-6">
+                <span class="cursor-pointer" onclick="switchLang('zh')" id="btn-zh">CN</span>
+                <span class="text-gray-300">/</span>
+                <span class="cursor-pointer font-bold" onclick="switchLang('en')" id="btn-en">EN</span>
+            </div>
+        </div>
+    </header>
+
+    <main id="view-home" class="px-8 md:px-24 fade-in">
+        <!-- Hero Section -->
+        <section class="hero-screen container-limit">
+            <div class="flex flex-col md:flex-row md:items-end justify-between w-full">
+                <div class="max-w-5xl">
+                    <!-- 2026 合作开启状态栏 -->
+                    <div class="flex items-center mb-10 fade-in" style="animation-delay: 0.2s;">
+                        <span class="status-dot"></span>
+                        <span class="text-[10px] uppercase tracking-[0.4em] text-gray-500" data-t="hero_status">Open for Collaboration 2026</span>
+                    </div>
+                    
+                    <h2 class="text-[11px] uppercase tracking-[0.6em] text-gray-400 mb-6 ml-1" data-t="hero_sub">Visual Archive</h2>
+                    <h1 class="text-5xl md:text-8xl serif leading-[1.1] font-light mb-12" data-t="hero_title">
+                        Capturing <span class="italic text-gray-400">thoughts and sparks</span>,<br>exploring the <span class="vibrant-accent">vibrant</span> world.
+                    </h1>
+                </div>
+                
+                <!-- 右侧竖向小字 -->
+                <div class="hidden lg:block pb-24">
+                    <div class="vertical-text text-[9px] tracking-[0.8em] text-gray-400 uppercase leading-loose border-r border-black/10 pr-6" data-t="hero_philosophy">
+                        Less is more / Logic is beauty / Design is life
+                    </div>
+                </div>
+            </div>
+            
+            <div class="scroll-indicator cursor-pointer" onclick="scrollToId('about-section')">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M7 13l5 5 5-5M7 6l5 5 5-5"/>
+                </svg>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about-section" class="mb-52">
+            <div class="about-full-bg">
+                <div class="about-overlay"></div>
+                <div class="relative z-10 px-8 md:px-32 max-w-5xl">
+                    <h3 class="text-[9px] uppercase tracking-[0.4em] text-gray-400 mb-12" data-t="about_label">Introduction</h3>
+                    <div class="text-2xl md:text-4xl serif font-light leading-relaxed italic text-gray-800" data-t="about_text">
+                        "I am a visual storyteller wandering between diverse mediums. Love and freedom—my guiding lights—infuse every frame with authenticity. I embrace life’s unplanned challenges, turning them into creative fuel. My eye lingers on overlooked moments: a stranger’s smile, raindrops on glass, wind-tousled petals—where true stories of connection and liberation reside."
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Archive Grid -->
+        <section id="projects-grid" class="container-limit grid grid-cols-1 md:grid-cols-2 gap-16 lg:gap-24 mb-32">
+            <div id="trigger-graphic" class="group cursor-pointer" onclick="showCategory('graphic')">
+                <div class="img-container mb-8 shadow-sm">
+                    <img src="https://images.unsplash.com/photo-1558655146-d09347e92766?q=80&w=1600&auto=format&fit=crop" alt="Graphic">
+                </div>
+                <div class="flex justify-between items-end border-b border-black/10 pb-4">
+                    <h3 class="text-3xl serif" data-t="cat_01">Graphic Design</h3>
+                    <span class="text-[10px] text-gray-300 tracking-widest">10 ITEMS</span>
+                </div>
+            </div>
+            <div id="trigger-video" class="group cursor-pointer" onclick="showCategory('video')">
+                <div class="img-container mb-8 shadow-sm">
+                    <img src="https://images.unsplash.com/photo-1492724441997-5dc865305da7?q=80&w=1600&auto=format&fit=crop" alt="Video">
+                </div>
+                <div class="flex justify-between items-end border-b border-black/10 pb-4">
+                    <h3 class="text-3xl serif" data-t="cat_02">Video Production</h3>
+                    <span class="text-[10px] text-gray-300 tracking-widest">7 ITEMS</span>
+                </div>
+            </div>
+            <div id="trigger-photo" class="group cursor-pointer" onclick="showCategory('photo')">
+                <div class="img-container mb-8 shadow-sm">
+                    <img src="https://images.unsplash.com/photo-1452587925148-ce544e77e70d?q=80&w=1600&auto=format&fit=crop" alt="Photo">
+                </div>
+                <div class="flex justify-between items-end border-b border-black/10 pb-4">
+                    <h3 class="text-3xl serif" data-t="cat_03">Photography</h3>
+                    <span class="text-[10px] text-gray-300 tracking-widest">6 ITEMS</span>
+                </div>
+            </div>
+            <div id="trigger-planning" class="group cursor-pointer" onclick="showCategory('planning')">
+                <div class="img-container mb-8 shadow-sm">
+                    <img src="https://images.unsplash.com/photo-1512314889357-e157c22f938d?q=80&w=1600&auto=format&fit=crop" alt="Planning">
+                </div>
+                <div class="flex justify-between items-end border-b border-black/10 pb-4">
+                    <h3 class="text-3xl serif" data-t="cat_04">Planning Strategy</h3>
+                    <span class="text-[10px] text-gray-300 tracking-widest">5 PDFS</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Writing Strip -->
+        <section id="writing-section" class="container-limit mb-52 pt-16">
+            <h3 class="text-[9px] uppercase tracking-[0.4em] text-gray-400 mb-12" data-t="cat_05_label">Writing & Thoughts</h3>
+            <div id="trigger-writing" class="writing-strip py-16 cursor-pointer flex justify-between items-center group" onclick="showCategory('writing')">
+                <span class="text-4xl md:text-6xl serif font-light" data-t="writing_cta">Explore Critical Essays and Narratives</span>
+                <div class="flex items-center gap-10">
+                    <span class="text-[10px] text-gray-300">3 ARTICLES</span>
+                    <div class="w-10 h-[1px] bg-black/10 group-hover:w-24 group-hover:bg-black transition-all duration-700"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact-area" class="container-limit py-40 border-t border-black/5 grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
+            <div class="contact-item" onclick="copyToClipboard('Newlifewfm')">
+                <p class="text-[9px] text-gray-400 uppercase tracking-[0.5em] mb-4" data-t="contact_wechat">Wechat</p>
+                <p class="contact-text serif text-3xl">Newlifewfm</p>
+            </div>
+            <div class="contact-item" onclick="copyToClipboard('joyeee1206@gmail.com')">
+                <p class="text-[9px] text-gray-400 uppercase tracking-[0.5em] mb-4" data-t="contact_email">Email</p>
+                <p class="contact-text serif text-3xl">joyeee1206@gmail.com</p>
+            </div>
+            <div class="contact-item" onclick="copyToClipboard('@Joyeee')">
+                <p class="text-[9px] text-gray-400 uppercase tracking-[0.5em] mb-4" data-t="contact_note">Red Note</p>
+                <p class="contact-text serif text-3xl">@Joyeee</p>
+            </div>
+        </section>
+    </main>
+
+    <main id="view-dynamic" class="px-8 md:px-24 pt-44 pb-32 hidden-view fade-in container-limit"></main>
+
+    <footer class="py-16 border-t border-black/5 text-center">
+        <p class="text-[8px] tracking-[0.6em] text-gray-300 uppercase">© 2026 Joyeee / Visual Archivist</p>
+    </footer>
+
+    <script>
+        const i18n = { 
+            zh: { 
+                hero_sub: '灵感档案馆', hero_status: '2026 开放合作中', hero_philosophy: '少即是多 / 逻辑即美 / 设计即生活',
+                hero_title: '用载体定格<span class="italic text-gray-400">思考与妙想</span>，<br>探索<span class="vibrant-accent">缤纷</span>的世界。', 
+                about_label: '简介',
+                about_text: '“我是一个游走在多种载体间的视觉叙事者。爱与自由是我前行的灯塔，赋予每一帧画面真实与灵动。我拥抱生命中不期而至的挑战，将其化为创作的养分。我的目光总在那些被忽略的瞬间驻留：陌生人的微笑、玻璃上的雨滴、被微风拨弄的花瓣——在那里，藏着关于连接与释放的真实故事。”', 
+                cat_01: '平面设计', cat_02: '视频作品', cat_03: '摄影作品', cat_04: '策划案作品', cat_05: '文字产出', cat_05_label: '文字产出与感悟', writing_cta: '探索深度专栏与叙事文字',
+                meta_date: '项目时间', meta_type: '内容分类', meta_role: '合作形式', meta_role_self: '独立完成', meta_role_team: '特约/合作',
+                btn_back_list: '返回列表', btn_back_home: '← 返回主页',
+                contact_wechat: '微信', contact_email: '邮箱', contact_note: '小红书'
+            }, 
+            en: { 
+                hero_sub: 'Visual Archive', hero_status: 'Open for Collaboration 2026', hero_philosophy: 'Less is more / Logic is beauty / Design is life',
+                hero_title: 'Capturing <span class="italic text-gray-400">thoughts and sparks</span>,<br>exploring the <span class="vibrant-accent">vibrant</span> world.', 
+                about_label: 'Introduction',
+                about_text: '"I am a visual storyteller wandering between diverse mediums. Love and freedom—my guiding lights—infuse every frame with authenticity. I embrace life’s unplanned challenges, turning them into creative fuel. My eye lingers on overlooked moments: a stranger’s smile, raindrops on glass, wind-tousled petals—where true stories of connection and liberation reside."', 
+                cat_01: 'Graphic Design', cat_02: 'Video Production', cat_03: 'Photography', cat_04: 'Planning Strategy', cat_05: 'Writing Output', cat_05_label: 'Writing & Thoughts', writing_cta: 'Explore Critical Essays and Narratives',
+                meta_date: 'Project Date', meta_type: 'Category', meta_role: 'Role', meta_role_self: 'Independent', meta_role_team: 'Commissioned',
+                btn_back_list: 'Back to List', btn_back_home: '← Back to Home',
+                contact_wechat: 'Wechat', contact_email: 'Email', contact_note: 'Red Note'
+            } 
+        };
+
+        const projectDB = {
+            graphic: Array.from({length: 10}, (_, i) => ({ id: `g${i+1}`, title: `Graphic Project ${i+1}`, thumb: `https://images.unsplash.com/photo-1558655146-d09347e92766?q=80&w=600&auto=format&fit=crop`, date: '2025.01', type: 'Branding', role: i%2==0 ? 'self' : 'team', content: 'Detailed case study about brand visual identity system design and implementation.' })),
+            video: Array.from({length: 7}, (_, i) => ({ id: `v${i+1}`, title: `Motion Piece ${i+1}`, thumb: `https://images.unsplash.com/photo-1492724441997-5dc865305da7?q=80&w=600&auto=format&fit=crop`, date: '2024.12', type: 'Short Film', role: 'team', content: 'Narrative storytelling through motion graphics and cinematic editing techniques.' })),
+            photo: Array.from({length: 6}, (_, i) => ({ id: `p${i+1}`, title: `Series ${i+1}`, thumb: `https://images.unsplash.com/photo-1452587925148-ce544e77e70d?q=80&w=600&auto=format&fit=crop`, date: '2024.10', type: 'Still Life', role: 'self', content: 'Exploration of light and shadow in everyday objects, focusing on minimal aesthetics.' })),
+            planning: Array.from({length: 5}, (_, i) => ({ id: `pl${i+1}`, title: `Proposal ${i+1}`, thumb: i % 2 === 0 ? `https://images.unsplash.com/photo-1512314889357-e157c22f938d?q=80&w=600&auto=format&fit=crop` : `https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=600&auto=format&fit=crop`, date: '2024.11', type: 'Strategy PDF', role: 'self', content: 'Comprehensive market analysis and creative campaign strategy for premium lifestyle brands.' })),
+            writing: [
+                { id: 'w1', title: '沉默的逻辑：建筑与留白的诗学', date: '2025.02', type: '建筑评论', role: 'self', content: '<p>在这个喧嚣的时代，建筑不再仅仅是砖石的堆砌，而是情绪的出口。我们习惯于用复杂的立面填充视觉，却往往忘记了“留白”才是最深刻的语言。从斯里兰卡的杰弗里·巴瓦，到现代的极简主义，空间的空隙并非缺失，而是为了让光线和空气以一种最自然的方式参与到叙事中来。</p><p>当我站在那些空旷的中庭，感受到微风穿堂而过，我意识到，好的设计不是给人一个终点，而是给人一个可以容纳思考的起点。这种“空”并非虚无，而是一种容纳性，它允许光线在一天中不同的时刻勾勒出墙壁的轮廓，也允许居住者在不同的心境下填充属于自己的故事。</p>' },
+                { id: 'w2', title: '数字时代的感官退化：重新寻找“真实”', date: '2025.01', type: '社会观察', role: 'self', content: '<p>屏幕正在吞噬我们的触觉。当我们习惯于在光滑的玻璃面上滑动，我们正在丧失对材质纹理的感知能力。粗糙的亚麻、冰凉的大理石、带有木纹温度的扶手，这些触感曾是我们连接世界最原始的方式。现在的我们，通过高分辨率的像素观看世界，却鲜少用指尖触碰它。</p><p>作为一名叙事者，我的使命或许就是通过文字去唤醒那些沉睡的感官。文字不应当只是数据的载体，它应当具有温度、质地和气味。当我在描写一朵被雨淋湿的花时，我不希望你只看到它的颜色，我希望你能感觉到那种潮湿的沉重感和泥土的芬芳。</p>' },
+                { id: 'w3', title: '视觉叙事：从载体到连接', date: '2024.12', type: '行业思考', role: 'team', content: '<p>视觉叙事并非只是为了好看。它是关于如何建立连接。一个成功的视觉作品，应当像一颗扔进湖心的小石子，在观众的心中激起涟漪。无论是平面设计、视频短片还是文字，它们都只是载体。真正重要的是载体背后传达的情感逻辑。</p><p>在多年的创作实践中，我发现最动人的故事往往藏在那些转瞬即逝的瞬间。一个不经意的眼神，一道掠过桌面的阳光，这些细节构成了生活的真实。我们需要做的，只是停下来，观察，然后记录。这种记录本身就是一种对生活的致敬。</p>' }
+            ]
+        };
+
+        let currentLang = 'en';
+        let lastCategoryId = null;
+        let lastProjectId = null;
+        
+        // --- 滚动记忆功能 ---
+        const scrollPositions = { home: 0, category: 0 };
+
+        function showHome(forceScrollTop = false) {
+            document.getElementById('view-home').classList.remove('hidden-view');
+            document.getElementById('view-dynamic').classList.add('hidden-view');
+            document.getElementById('dynamic-nav').innerHTML = '';
+            document.getElementById('main-nav').style.display = 'flex';
+            
+            if (forceScrollTop) {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                setTimeout(() => {
+                    window.scrollTo({ top: scrollPositions.home, behavior: 'smooth' });
+                }, 10);
+            }
+        }
+
+        function getCategoryKey(catId) {
+            const map = { 'graphic': 'cat_01', 'video': 'cat_02', 'photo': 'cat_03', 'planning': 'cat_04', 'writing': 'cat_05' };
+            return map[catId] || 'cat_01';
+        }
+
+        function showCategory(catId) {
+            if (!document.getElementById('view-home').classList.contains('hidden-view')) {
+                scrollPositions.home = window.scrollY;
+            }
+
+            lastCategoryId = catId;
+            const list = projectDB[catId];
+            const container = document.getElementById('view-dynamic');
+            const catKey = getCategoryKey(catId);
+            const catName = i18n[currentLang][catKey];
+            
+            let content = '';
+            if (catId === 'writing') {
+                content = `
+                    <div class="mb-24 flex flex-col md:flex-row justify-between items-start md:items-end border-b border-black/5 pb-6">
+                        <h2 class="text-5xl serif font-light">${catName}</h2>
+                        <span class="text-[9px] text-gray-400 uppercase tracking-widest mt-4 md:mt-0">${list.length} Articles</span>
+                    </div>
+                    <div class="max-w-4xl mx-auto space-y-4">
+                        ${list.map(p => `
+                            <div class="writing-card" onclick="showDetail('${catId}', '${p.id}')">
+                                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                    <div class="flex-1">
+                                        <p class="text-[9px] text-gray-400 uppercase tracking-widest mb-3">${p.date} / ${p.type}</p>
+                                        <h3 class="writing-title text-2xl md:text-3xl serif">${p.title}</h3>
+                                    </div>
+                                    <div class="text-[10px] tracking-widest text-gray-300 uppercase">${p.role === 'self' ? i18n[currentLang].meta_role_self : i18n[currentLang].meta_role_team}</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else {
+                content = `
+                    <div class="mb-24 flex flex-col md:flex-row justify-between items-start md:items-end border-b border-black/5 pb-6">
+                        <h2 class="text-5xl serif font-light">${catName}</h2>
+                        <span class="text-[9px] text-gray-400 uppercase tracking-widest mt-4 md:mt-0">${list.length} Items</span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-16 lg:gap-24">
+                        ${list.map(p => `
+                            <div class="group cursor-pointer" onclick="showDetail('${catId}', '${p.id}')">
+                                <div class="img-container mb-6 shadow-sm"><img src="${p.thumb}" /></div>
+                                <div class="flex justify-between items-end border-b border-black/5 pb-3">
+                                    <h3 class="text-2xl serif">${p.title}</h3>
+                                    <p class="text-[9px] text-gray-300 uppercase tracking-widest">${p.date} / ${p.type}</p>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            
+            container.innerHTML = content;
+            container.classList.remove('hidden-view');
+            document.getElementById('view-home').classList.add('hidden-view');
+            document.getElementById('main-nav').style.display = 'none';
+            document.getElementById('dynamic-nav').innerHTML = `<button onclick="showHome(false)" class="text-[9px] tracking-widest uppercase border border-black/20 px-6 py-2 hover:bg-black hover:text-white transition-all">${i18n[currentLang].btn_back_home}</button>`;
+            
+            setTimeout(() => { window.scrollTo({ top: scrollPositions.category, behavior: 'smooth' }); }, 10);
+        }
+
+        function showDetail(catId, projId) {
+            scrollPositions.category = window.scrollY;
+            lastProjectId = projId;
+            const proj = projectDB[catId].find(p => p.id === projId);
+            const container = document.getElementById('view-dynamic');
+            const t = i18n[currentLang];
+
+            let detailContent = '';
+            if (catId === 'writing') {
+                detailContent = `
+                    <div class="fade-in max-w-2xl mx-auto">
+                        <div class="mb-24 text-center">
+                            <h1 class="text-4xl md:text-6xl serif font-light mb-12 leading-tight">${proj.title}</h1>
+                            <div class="flex justify-center gap-12 text-center border-t border-b border-black/5 py-8">
+                                <div><div class="detail-meta-label">${t.meta_date}</div><div class="text-sm font-light">${proj.date}</div></div>
+                                <div><div class="detail-meta-label">${t.meta_type}</div><div class="text-sm font-light">${proj.type}</div></div>
+                                <div><div class="detail-meta-label">${t.meta_role}</div><div class="text-sm font-light">${proj.role === 'self' ? t.meta_role_self : t.meta_role_team}</div></div>
+                            </div>
+                        </div>
+                        <article class="reading-view serif italic-quotes">${proj.content}</article>
+                        <div class="pt-24 flex justify-center border-t border-black/5 mt-24">
+                            <div onclick="showCategory('${catId}')" class="back-btn-bottom"><span>${t.btn_back_list}</span></div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                detailContent = `
+                    <div class="fade-in">
+                        <h1 class="text-5xl md:text-8xl serif font-light mb-16">${proj.title}</h1>
+                        <div class="grid grid-cols-1 lg:grid-cols-4 gap-20">
+                            <div class="lg:col-span-1">
+                                <div class="detail-meta-label">${t.meta_date}</div><div class="detail-meta-value">${proj.date}</div>
+                                <div class="detail-meta-label">${t.meta_type}</div><div class="detail-meta-value">${proj.type}</div>
+                                <div class="detail-meta-label">${t.meta_role}</div><div class="detail-meta-value">${proj.role === 'self' ? t.meta_role_self : t.meta_role_team}</div>
+                                <div class="mt-12 text-sm leading-relaxed text-gray-600 font-light">${proj.content}</div>
+                            </div>
+                            <div class="lg:col-span-3 space-y-12">
+                                <div class="img-container w-full shadow-lg h-auto cursor-default"><img src="${proj.thumb}" class="w-full grayscale-0" style="filter:none;"></div>
+                                <div class="asset-placeholder"><span class="font-bold">GALLERY VIEW</span><span class="opacity-60">Visual Showcase Area</span></div>
+                                <div class="pt-16 border-t border-black/5 flex justify-end">
+                                    <div onclick="showCategory('${catId}')" class="back-btn-bottom"><span>${t.btn_back_list}</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = detailContent;
+            window.scrollTo(0, 0);
+        }
+
+        function switchLang(lang) {
+            currentLang = lang;
+            document.querySelectorAll('[data-t]').forEach(el => { 
+                const key = el.getAttribute('data-t'); 
+                if (i18n[lang][key]) el.innerHTML = i18n[lang][key]; 
+            });
+            document.getElementById('btn-zh').style.fontWeight = lang === 'zh' ? 'bold' : 'normal';
+            document.getElementById('btn-en').style.fontWeight = lang === 'en' ? 'bold' : 'normal';
+            
+            const dynamic = document.getElementById('view-dynamic');
+            if (!dynamic.classList.contains('hidden-view')) {
+                const isDetail = dynamic.querySelector('.back-btn-bottom');
+                if (!isDetail) showCategory(lastCategoryId);
+                else showDetail(lastCategoryId, lastProjectId);
+            }
+        }
+
+        function scrollToId(id) { const el = document.getElementById(id); if (el) window.scrollTo({ top: el.offsetTop - 100, behavior: 'smooth' }); }
+        
+        function copyToClipboard(text) {
+            const el = document.createElement('textarea'); el.value = text; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el);
+            const toast = document.getElementById('copy-toast'); 
+            toast.innerText = currentLang === 'zh' ? "已为您复制 请在平台上找到我O(∩_∩)O" : "Copied to clipboard!";
+            toast.classList.add('active'); 
+            setTimeout(() => toast.classList.remove('active'), 2500);
+        }
+
+        // --- 粒子系统交互 ---
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let mouse = { x: -1000, y: -1000 };
+        let lastTime = 0;
+        const dpr = window.devicePixelRatio || 1;
+
+        window.addEventListener('mousemove', (e) => { mouse.x = e.clientX * dpr; mouse.y = e.clientY * dpr; });
+
+        class Snowflake {
+            constructor() { this.init(); }
+            init() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.baseVx = (Math.random() - 0.5) * 40;
+                this.baseVy = (Math.random() * 60 + 30);
+                this.vx = this.baseVx;
+                this.vy = this.baseVy;
+                this.size = (Math.random() * 2 + 1) * dpr;
+                this.opacity = Math.random() * 0.4 + 0.1;
+                this.rotation = Math.random() * Math.PI * 2;
+                this.spin = (Math.random() - 0.5) * 1.5;
+            }
+            draw() {
+                ctx.save(); 
+                ctx.translate(this.x, this.y); 
+                ctx.rotate(this.rotation); 
+                ctx.beginPath();
+                ctx.strokeStyle = `rgba(160, 200, 255, ${this.opacity})`; 
+                ctx.lineWidth = 0.8 * dpr;
+                for (let i = 0; i < 6; i++) { ctx.rotate(Math.PI / 3); ctx.moveTo(0, 0); ctx.lineTo(0, this.size * 2); }
+                ctx.stroke(); 
+                ctx.restore();
+            }
+            update(dt) {
+                const dx = this.x - mouse.x;
+                const dy = this.y - mouse.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                const maxDist = 180 * dpr;
+                if (dist < maxDist) {
+                    const force = (maxDist - dist) / maxDist;
+                    this.vx += (dx / dist) * force * 200;
+                    this.vy += (dy / dist) * force * 200;
+                }
+                this.vx += (this.baseVx - this.vx) * 0.05;
+                this.vy += (this.baseVy - this.vy) * 0.05;
+                this.x += this.vx * dt; 
+                this.y += this.vy * dt; 
+                this.rotation += this.spin * dt;
+                if (this.y > canvas.height + 20) { this.y = -20; this.x = Math.random() * canvas.width; }
+                if (this.x > canvas.width + 20) this.x = -20;
+                if (this.x < -20) this.x = canvas.width + 20;
+            }
+        }
+
+        function initCanvas() {
+            canvas.width = window.innerWidth * dpr; canvas.height = window.innerHeight * dpr;
+            canvas.style.width = window.innerWidth + 'px'; canvas.style.height = window.innerHeight + 'px';
+            particles = Array.from({length: 120}, () => new Snowflake());
+        }
+
+        function animate(time) {
+            const dt = (time - lastTime) / 1000; lastTime = time;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => { p.update(dt || 0.016); p.draw(); });
+            requestAnimationFrame(animate);
+        }
+        
+        window.addEventListener('resize', initCanvas);
+        initCanvas(); 
+        requestAnimationFrame((t) => { lastTime = t; animate(t); });
+    </script>
+</body>
+</html>
